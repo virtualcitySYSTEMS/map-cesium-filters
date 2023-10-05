@@ -1,0 +1,70 @@
+{
+  "name": "@vcmap/cesium-filters",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "prepublishOnly": "vcmplugin build",
+    "build": "vcmplugin build",
+    "bundle": "vcmplugin bundle",
+    "start": "vcmplugin serve",
+    "preview": "vcmplugin preview",
+    "buildStagingApp": "vcmplugin buildStagingApp",
+    "lint:js": "eslint . --ext .vue,.js,.cjs,.mjs,.ts,.cts,.mts",
+    "lint:prettier": "prettier --check .",
+    "lint": "npm run lint:js && npm run lint:prettier",
+    "format": "prettier --write --list-different . && npm run lint:js -- --fix",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "author": "Patrick Würstle <pwuerstle@virtualcitysystems.de>",
+  "license": "MIT",
+  "keywords": [
+    "vcmap",
+    "plugin"
+  ],
+  "files": [
+    "src/",
+    "dist/",
+    "plugin-assets/",
+    "LICENSE.md",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./dist": "./dist/index.js"
+  },
+  "eslintIgnore": [
+    "node_modules",
+    "dist",
+    "plugin-assets"
+  ],
+  "eslintConfig": {
+    "root": true,
+    "extends": "@vcsuite/eslint-config/vue"
+  },
+  "prettier": "@vcsuite/eslint-config/prettier.js",
+  "peerDependencies": {
+    "@vcmap-cesium/engine": "^4.0.3",
+    "@vcmap/core": "^5.0.2",
+    "@vcmap/ui": "^5.0.2",
+    "ol": "^7.5.2",
+    "vue": "~2.7.3",
+    "vuetify": "~2.6.7"
+  },
+  "devDependencies": {
+    "@vcmap/plugin-cli": "^2.1.17",
+    "@vcsuite/eslint-config": "^3.0.5",
+    "@vitest/coverage-v8": "^0.34.5",
+    "jest-canvas-mock": "^2.5.2",
+    "jsdom": "^22.1.0",
+    "resize-observer-polyfill": "^1.5.1",
+    "vitest": "^0.34.5"
+  },
+  "mapVersion": "^5.0",
+  "dependencies": {
+    "@vcsuite/check": "^2.1.0"
+  }
+}

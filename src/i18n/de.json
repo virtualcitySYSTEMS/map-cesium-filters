@@ -1,0 +1,94 @@
+{
+  "cesium-filters": {
+    "title": "Filter und Effekte",
+    "title2": "Hight Dynamic Range (HDR)",
+    "title3": "Beleuchtung",
+    "lightIntensity": "Intensität",
+    "hdr": "High Dynamic Range (HDR)",
+    "hdrgamma": "Gamma",
+    "close": "Schließen",
+    "log": "Loggen",
+    "FogPPS": "Nebel als Post Processing Schritt",
+    "logTooltip": "Logge Hello World in Console",
+    "nightvision": "Nacht Sicht",
+    "currentPOS": "Updaten mit aktueller Position",
+    "reset": "Werte zurücksetzen",
+    "MessageMoon": "Um den Himmel dem Mondlicht anzupassen ist es noch notwendig in den Zeiteinstellungen auf Nacht zu schalten.",
+    "errormessage": {
+      "intensity": "Wert muss zischen 0 und 100 sein",
+      "bias": "Wert muss zischen 0 und 1 sein",
+      "lengthCap": "Wert muss zischen 0 und 1000 sein",
+      "stepSize": "Wert muss zischen 0 und 10 sein",
+      "blurStepSize": "Wert muss zischen 0 und 10 sein",
+      "frustumLength": "Wert muss zischen 0 und 10000",
+      "gradiations": "Wert muss zischen 0 und 1000 sein",
+      "contrast": "Wert muss zischen -255 und 255 sein",
+      "brightness": "Wert muss zischen -1 und 1 sein",
+      "delta": "Wert muss zischen -10 und 10 sein",
+      "sigma": "Wert muss zischen -10 und 100 sein",
+      "stepSizeBloom": "Wert muss zischen 0 und 100",
+      "gamma": "Wert muss zischen 0 und 1000 sein",
+      "brightnessB": "Wert muss zischen 0 und 10 sein",
+      "focalDistance": "Wert muss zischen 0 und 1000 sein",
+      "deltaDoF": "Wert muss zischen 0 und 100",
+      "sigmaDoF": "Wert muss zischen 0 und 100",
+      "stepSizeDoF": "Wert muss zischen 0 und 100",
+      "deltaBlur": "Wert muss zischen 0 und 10",
+      "sigmaBlur": "Wert muss zischen 0 und 10",
+      "stepSizeBlur": "Wert muss zischen 0 und 100",
+      "lightIntensity": "Wert muss zischen 0 und 100 sein"
+    },
+    "tooltip": {
+      "reset": "Werte zurücksetzen",
+      "activate": "Aktivieren",
+      "deactivate": "Deaktivieren"
+    },
+    "lighting": {
+      "sun": "Sonnenlicht",
+      "moon": "Mondlicht",
+      "flash": "Taschenlampe",
+      "fixed": "Fixierte Lamp"
+    },
+    "blurs": {
+      "blur": "Unschärfe",
+      "blurDelta": "Delta",
+      "blurSigma": "Sigma",
+      "blurStepSize": "Schritt Größe"
+    },
+    "silhouette": "Silhouette",
+    "brightness": "Helligkeit",
+    "baw": "Schwarz und Weiß",
+    "bwgrad": "Abstufungen",
+    "depthOF": {
+      "dof": "Tiefenschärfe",
+      "dofFocalDistance": "Brennweite",
+      "dofdelta": "Delta",
+      "dofsigma": "Sigma",
+      "dofstepSize": "Schritt Größe"
+    },
+    "ambientOc": {
+      "ambientOcclusion": "Umgebungsokklusion",
+      "AOambOexcl": "Nur Umgebungsokklusion",
+      "AOitensity": "Intensität",
+      "AObias": "Bias",
+      "AOlengthCap": "Length Cap",
+      "AOstepSize": "Schritt Größe",
+      "AOblurStepSize": "Unschärfe Schritt Größe",
+      "AOfrustumLength": "Frustum Länge"
+    },
+    "Blooms": {
+      "Bloom": "Bloom",
+      "Bglowexcl": "glowOnly",
+      "BContrast": "Kontrast",
+      "Bbrightness": "Helligkeit",
+      "Bdelta": "Delta",
+      "Bsigma": "Sigma",
+      "BstepSize": "Schritt Größe"
+    },
+    "toolState": {
+      "open": "Filter und Effekte",
+      "activate": "Filter und Effekte",
+      "deactivate": "Fenster schließen"
+    }
+  }
+}
