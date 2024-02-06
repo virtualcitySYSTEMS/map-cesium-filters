@@ -753,7 +753,9 @@ export default function FilterEffectsPlugin(config) {
     },
     getDefaultOptions,
 
-    toJSON() {},
+    toJSON() {
+      return {};
+    },
     i18n: {
       de,
       en,
