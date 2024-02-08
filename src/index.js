@@ -752,7 +752,9 @@ export default function FilterEffectsPlugin(config) {
       }
     },
     getDefaultOptions,
-
+    getConfigEditors() {
+      return [];
+    },
     toJSON() {
       return {};
     },
