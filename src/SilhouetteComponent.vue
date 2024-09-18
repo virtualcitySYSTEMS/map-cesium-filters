@@ -5,15 +5,15 @@
     :header-actions="actions"
     heading="cesium-filters.silhouette"
   >
-    <v-container style="padding-top: 0px">
+    <v-container>
       <v-row no-gutters>
         <v-col>
-          <div class="d-flex flex-column">
+          <div class="d-flex justify-center" style="margin: 0 2px 0 2px">
             <v-color-picker
               v-model="silhouette.color"
               :disabled="!silhouette.enabled"
-              @input="onInput"
               :modes="['hex', 'rgb']"
+              style="width: 100%"
             >
             </v-color-picker>
           </div>
@@ -24,8 +24,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, watch, reactive, computed } from 'vue';
-  import { VRow, VCol, VContainer, VColorPicker } from 'vuetify/lib';
+  import { inject, reactive, computed } from 'vue';
+  import { VRow, VCol, VContainer, VColorPicker } from 'vuetify/components';
+  import { useProxiedComplexModel } from '@vcmap/ui';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getSilhouetteDefaults } from './defaultValues.js';
   import { silhouettePattern } from './validators.js';
@@ -40,7 +41,7 @@
       ModifiedSectionComponent,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getSilhouetteDefaults,
         validator: (value) => {
@@ -49,15 +50,8 @@
       },
     },
     setup(props, { emit }) {
-      const silhouette = { ...props.value };
+      const silhouette = useProxiedComplexModel(props, 'modelValue', emit);
       const silhouetteDefaults = getSilhouetteDefaults();
-
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(silhouette, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
 
@@ -73,22 +67,19 @@
         name: 'enableSilAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: silhouette.enabled,
+        active: silhouette.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !silhouette.enabled,
-          });
-          this.active = !silhouette.enabled;
-          this.setTitleAndIcon();
+          silhouette.value.enabled = !silhouette.value.enabled;
+          enableAction.active = silhouette.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
@@ -99,36 +90,33 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...silhouetteDefaults,
-            enabled: silhouette.enabled,
-          });
+          silhouette.value = { ...silhouetteDefaults };
+          enableAction.active = silhouette.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(silhouette.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== silhouetteDefaults[key])
+            .some((key) => silhouette.value[key] !== silhouetteDefaults[key])
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(silhouette, silhouettePattern)) {
-          emit('input', { ...silhouette });
-        }
-      };
-
       return {
         rules,
         actions,
         silhouette,
-        onInput,
       };
     },
   };
 </script>
+<style scoped lang="scss">
+  .v-color-picker.v-sheet {
+    box-shadow: none;
+  }
+</style>

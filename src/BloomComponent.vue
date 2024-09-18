@@ -5,7 +5,7 @@
     :header-actions="actions"
     heading="cesium-filters.Blooms.Bloom"
   >
-    <v-container style="padding-top: 0px; padding-left: 24px">
+    <v-container>
       <v-row no-gutters>
         <v-col>
           <VcsLabel html-for="BContrast_id">
@@ -23,7 +23,6 @@
             v-model.number="bloom.contrast"
             :rules="rules.contrast"
             :disabled="!bloom.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -44,7 +43,6 @@
             v-model.number="bloom.brightness"
             :rules="rules.brightness"
             :disabled="!bloom.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -65,7 +63,6 @@
             v-model.number="bloom.delta"
             :rules="rules.delta"
             :disabled="!bloom.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -86,7 +83,6 @@
             v-model.number="bloom.sigma"
             :rules="rules.sigma"
             :disabled="!bloom.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -107,7 +103,6 @@
             v-model.number="bloom.stepSize"
             :rules="rules.stepSize"
             :disabled="!bloom.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -119,7 +114,6 @@
             :true-value="true"
             :false-value="false"
             :disabled="!bloom.enabled"
-            @change="onInput"
           />
         </v-col>
         <v-col>
@@ -133,9 +127,15 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField, VcsCheckbox, VcsSlider } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import {
+    VcsLabel,
+    VcsTextField,
+    VcsCheckbox,
+    VcsSlider,
+    useProxiedComplexModel,
+  } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getBloomDefaults } from './defaultValues.js';
   import { bloomPattern } from './validators.js';
@@ -153,7 +153,7 @@
       VcsSlider,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getBloomDefaults,
         validator: (value) => {
@@ -162,14 +162,8 @@
       },
     },
     setup(props, { emit }) {
-      const bloom = { ...props.value };
+      const bloom = useProxiedComplexModel(props, 'modelValue', emit);
       const bloomDefaults = getBloomDefaults();
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(bloom, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
       const rules = {
@@ -204,22 +198,19 @@
         name: 'enableBloAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: bloom.enabled,
+        active: bloom.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !bloom.enabled,
-          });
-          this.active = !bloom.enabled;
-          this.setTitleAndIcon();
+          bloom.value.enabled = !bloom.value.enabled;
+          enableAction.active = bloom.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
       enableAction.setTitleAndIcon();
@@ -228,36 +219,29 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...bloomDefaults,
-            enabled: bloom.enabled,
-          });
+          bloom.value = { ...bloomDefaults };
+          enableAction.active = bloom.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(bloom.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== bloomDefaults[key])
+            .some((key) => bloom.value[key] !== bloomDefaults[key])
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(bloom, bloomPattern)) {
-          emit('input', { ...bloom });
-        }
-      };
-
       return {
         rules,
         actions,
         bloom,
-        onInput,
       };
     },
   };
 </script>
+<style scoped lang="scss"></style>

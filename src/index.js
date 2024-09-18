@@ -64,17 +64,17 @@ function setupButton(app) {
   };
 
   const action = reactive({
-    name: computed(() => getToggleTitle(this)),
+    name: computed(() => getToggleTitle(action)),
     title: 'cesium-filters.toolState.open',
     icon: '$vcsRectangle',
     active: false,
     disabled: false,
     callback() {
-      if (this.active) {
+      if (action.active) {
         app.windowManager.remove(windowComponent.id);
-        this.active = false;
+        action.active = false;
       } else {
-        this.active = true;
+        action.active = true;
         app.windowManager.add(windowComponent, name);
       }
     },
@@ -455,38 +455,35 @@ export default function FilterEffectsPlugin(config) {
           },
         ),
       );
-      let edgedetect = null;
       watcher.push(
         watch(
           () => myValues.silhouette,
           (newValue) => {
             const map = vcsUiApp.maps.activeMap;
             if (map instanceof CesiumMap) {
-              if (!edgedetect) {
-                edgedetect = PostProcessStageLibrary.createEdgeDetectionStage();
+              const silStage = PostProcessStageLibrary.createSilhouetteStage();
+
+              if (
+                map.getScene()?.postProcessStages?.getStageByName(silStage.name)
+              ) {
+                map
+                  .getScene()
+                  ?.postProcessStages?.remove(
+                    map
+                      .getScene()
+                      ?.postProcessStages?.getStageByName(silStage.name),
+                  );
               }
-              if (edgedetect && is(newValue, silhouettePattern)) {
-                edgedetect.uniforms.color = Color.fromCssColorString(
+
+              const silhouette = map
+                .getScene()
+                ?.postProcessStages?.add(silStage);
+
+              if (silhouette && is(newValue, silhouettePattern)) {
+                silhouette.enabled = newValue.enabled;
+                silhouette.uniforms.color = Color.fromCssColorString(
                   newValue.color,
                 );
-                const silStage = PostProcessStageLibrary.createSilhouetteStage([
-                  edgedetect,
-                ]);
-                let silhouette;
-                if (
-                  map
-                    .getScene()
-                    ?.postProcessStages?.getStageByName(silStage.name)
-                ) {
-                  silhouette = map
-                    .getScene()
-                    ?.postProcessStages?.getStageByName(silStage.name);
-                } else {
-                  silhouette = map.getScene()?.postProcessStages?.add(silStage);
-                }
-                if (silhouette && is(newValue, silhouettePattern)) {
-                  silhouette.enabled = newValue.enabled;
-                }
               }
             }
           },

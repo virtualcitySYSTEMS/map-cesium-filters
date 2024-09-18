@@ -26,7 +26,7 @@
 </style>
 <script>
   import { inject } from 'vue';
-  import { VSheet } from 'vuetify/lib';
+  import { VSheet } from 'vuetify/components';
   import { CesiumMap } from '@vcmap/core';
   import AmbientOcclusionComponent from './AmbientOcclusionComponent.vue';
   import BloomComponent from './BloomComponent.vue';

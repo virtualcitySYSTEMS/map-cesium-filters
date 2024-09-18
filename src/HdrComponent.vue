@@ -5,7 +5,7 @@
     :header-actions="actions"
     heading="cesium-filters.hdr"
   >
-    <v-container style="padding-top: 0px; padding-left: 24px">
+    <v-container>
       <v-row no-gutters>
         <v-col>
           <VcsLabel html-for="hdrgamma_id">
@@ -23,7 +23,6 @@
             show-spin-buttons
             v-model.number="hdr.gamma"
             :disabled="!hdr.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -32,9 +31,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import { useProxiedComplexModel, VcsLabel, VcsTextField } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import { getHDRDefaults } from './defaultValues.js';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { hdrPattern } from './validators.js';
@@ -50,7 +49,7 @@
       VcsTextField,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getHDRDefaults,
         validator: (value) => {
@@ -59,15 +58,8 @@
       },
     },
     setup(props, { emit }) {
-      const hdr = { ...props.value };
+      const hdr = useProxiedComplexModel(props, 'modelValue', emit);
       const hdrDefaults = getHDRDefaults();
-
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(hdr, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
       const rules = {
@@ -82,22 +74,19 @@
         name: 'enableHdrAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: hdr.enabled,
+        active: hdr.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !hdr.enabled,
-          });
-          this.active = !hdr.enabled;
-          this.setTitleAndIcon();
+          hdr.value.enabled = !hdr.value.enabled;
+          enableAction.active = hdr.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
       enableAction.setTitleAndIcon();
@@ -107,36 +96,29 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...hdrDefaults,
-            enabled: hdr.enabled,
-          });
+          hdr.value = { ...hdrDefaults };
+          enableAction.active = hdr.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(hdr.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== hdrDefaults[key])
+            .some((key) => hdr.value[key] !== hdrDefaults[key])
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(hdr, hdrPattern)) {
-          emit('input', { ...hdr });
-        }
-      };
-
       return {
         rules,
         actions,
         hdr,
-        onInput,
       };
     },
   };
 </script>
+<style lang="scss" scoped></style>

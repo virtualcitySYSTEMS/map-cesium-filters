@@ -23,7 +23,6 @@
             v-model.number="blur.delta"
             :rules="rules.delta"
             :disabled="!blur.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -44,7 +43,6 @@
             v-model.number="blur.sigma"
             :rules="rules.sigma"
             :disabled="!blur.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -65,7 +63,6 @@
             v-model.number="blur.stepSize"
             :rules="rules.stepSize"
             :disabled="!blur.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -74,9 +71,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import { useProxiedComplexModel, VcsLabel, VcsTextField } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getBlurDefaults } from './defaultValues.js';
   import { blurPattern } from './validators.js';
@@ -92,7 +89,7 @@
       VcsTextField,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getBlurDefaults,
         validator: (value) => {
@@ -101,14 +98,9 @@
       },
     },
     setup(props, { emit }) {
-      const blur = { ...props.value };
+      const blur = useProxiedComplexModel(props, 'modelValue', emit);
+
       const blurDefaults = getBlurDefaults();
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(blur, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
       const rules = {
@@ -133,22 +125,19 @@
         name: 'enableBluAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: blur.enabled,
+        active: blur.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !blur.enabled,
-          });
-          this.active = !blur.enabled;
-          this.setTitleAndIcon();
+          blur.value.enabled = !blur.value.enabled;
+          enableAction.active = blur.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
@@ -159,36 +148,29 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...blurDefaults,
-            enabled: blur.enabled,
-          });
+          blur.value = { ...blurDefaults };
+          enableAction.active = blur.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(blur.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== blurDefaults[key])
+            .some((key) => blur.value[key] !== blurDefaults[key])
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(blur, blurPattern)) {
-          emit('input', { ...blur });
-        }
-      };
-
       return {
         rules,
         actions,
         blur,
-        onInput,
       };
     },
   };
 </script>
+<style lang="scss" scoped></style>

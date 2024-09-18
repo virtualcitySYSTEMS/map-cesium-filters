@@ -1,6 +1,6 @@
 {
   "name": "@vcmap/cesium-filters",
-  "version": "1.0.3",
+  "version": "2.0.0-rc.0",
   "description": "",
   "type": "module",
   "main": "src/index.js",
@@ -47,23 +47,23 @@
   },
   "prettier": "@vcsuite/eslint-config/prettier.js",
   "peerDependencies": {
-    "@vcmap-cesium/engine": "^4.0.3",
-    "@vcmap/core": "^5.0.2",
-    "@vcmap/ui": "^5.0.2",
-    "ol": "^7.5.2",
-    "vue": "~2.7.3",
-    "vuetify": "~2.6.7"
+    "@vcmap-cesium/engine": "^11.0.2",
+    "@vcmap/core": "^6.0.0-rc.8",
+    "@vcmap/ui": "^6.0.0-rc.8",
+    "ol": "^10.0.0",
+    "vue": "~3.4.38",
+    "vuetify": "^3.7.2"
   },
   "devDependencies": {
-    "@vcmap/plugin-cli": "^2.1.17",
-    "@vcsuite/eslint-config": "^3.0.5",
-    "@vitest/coverage-v8": "^0.34.5",
+    "@vcmap/plugin-cli": "^4.0.0-rc.5",
+    "@vcsuite/eslint-config": "^3.0.7",
+    "@vitest/coverage-v8": "^2.1.1",
     "jest-canvas-mock": "^2.5.2",
-    "jsdom": "^22.1.0",
+    "jsdom": "^24.0.0",
     "resize-observer-polyfill": "^1.5.1",
-    "vitest": "^0.34.5"
+    "vitest": "^2.1.1"
   },
-  "mapVersion": "^5.0",
+  "mapVersion": "^6.0",
   "dependencies": {
     "@vcsuite/check": "^2.1.0"
   }

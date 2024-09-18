@@ -21,7 +21,7 @@
       "stepSize": "Wert muss zischen 0 und 10 sein",
       "blurStepSize": "Wert muss zischen 0 und 10 sein",
       "frustumLength": "Wert muss zischen 0 und 10000",
-      "gradiations": "Wert muss zischen 0 und 1000 sein",
+      "gradations ": "Wert muss zischen 0 und 1000 sein",
       "contrast": "Wert muss zischen -255 und 255 sein",
       "brightness": "Wert muss zischen -1 und 1 sein",
       "delta": "Wert muss zischen -10 und 10 sein",
@@ -58,7 +58,7 @@
     "silhouette": "Silhouette",
     "brightness": "Helligkeit",
     "baw": "Schwarz und Weiß",
-    "bwgrad": "Abstufungen",
+    "bwgrad": "Gradations",
     "depthOF": {
       "dof": "Tiefenschärfe",
       "dofFocalDistance": "Brennweite",

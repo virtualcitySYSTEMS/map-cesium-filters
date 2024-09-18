@@ -4,7 +4,8 @@
     :action-button-list-overflow-count="5"
     :header-actions="actions"
     heading="cesium-filters.baw"
-    ><v-container style="padding-top: 0px; padding-left: 24px">
+  >
+    <v-container>
       <v-row no-gutters>
         <v-col>
           <VcsLabel html-for="bwgrad_id">
@@ -22,7 +23,6 @@
             show-spin-buttons
             v-model.number="blackAndWhite.gradations"
             :disabled="!blackAndWhite.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -31,9 +31,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import { useProxiedComplexModel, VcsLabel, VcsTextField } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getBlackAndWhiteDefaults } from './defaultValues.js';
   import { blackAndWhitePattern } from './validators.js';
@@ -49,7 +49,7 @@
       VcsTextField,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getBlackAndWhiteDefaults,
         validator: (value) => {
@@ -58,14 +58,8 @@
       },
     },
     setup(props, { emit }) {
-      const blackAndWhite = { ...props.value };
+      const blackAndWhite = useProxiedComplexModel(props, 'modelValue', emit);
       const blackAndWhiteDefaults = getBlackAndWhiteDefaults();
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(blackAndWhite, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
       const rules = {
@@ -80,22 +74,19 @@
         name: 'enableBaWAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: blackAndWhite.enabled,
+        active: blackAndWhite.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !blackAndWhite.enabled,
-          });
-          this.active = !blackAndWhite.enabled;
-          this.setTitleAndIcon();
+          blackAndWhite.value.enabled = !blackAndWhite.value.enabled;
+          enableAction.active = blackAndWhite.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
       enableAction.setTitleAndIcon();
@@ -104,36 +95,31 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...blackAndWhiteDefaults,
-            enabled: blackAndWhite.enabled,
-          });
+          blackAndWhite.value = { ...blackAndWhiteDefaults };
+          enableAction.active = blackAndWhite.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(blackAndWhite.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== blackAndWhiteDefaults[key])
+            .some(
+              (key) => blackAndWhite.value[key] !== blackAndWhiteDefaults[key],
+            )
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(blackAndWhite, blackAndWhitePattern)) {
-          emit('input', { ...blackAndWhite });
-        }
-      };
-
       return {
         rules,
         actions,
         blackAndWhite,
-        onInput,
       };
     },
   };
 </script>
+<style lang="scss" scoped></style>

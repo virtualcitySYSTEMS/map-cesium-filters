@@ -4,7 +4,8 @@
     :action-button-list-overflow-count="5"
     :header-actions="actions"
     heading="cesium-filters.depthOF.dof"
-    ><v-container style="padding-top: 0px; padding-left: 24px">
+  >
+    <v-container>
       <v-row no-gutters>
         <v-col>
           <VcsLabel html-for="dofFocalDistance_id">
@@ -22,7 +23,6 @@
             v-model.number="depthOfField.focalDistance"
             :rules="rules.focalDistance"
             :disabled="!depthOfField.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -43,7 +43,6 @@
             v-model.number="depthOfField.delta"
             :rules="rules.delta"
             :disabled="!depthOfField.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -64,7 +63,6 @@
             v-model.number="depthOfField.sigma"
             :rules="rules.sigma"
             :disabled="!depthOfField.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -85,7 +83,6 @@
             v-model.number="depthOfField.stepSize"
             :rules="rules.stepSize"
             :disabled="!depthOfField.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -94,9 +91,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import { useProxiedComplexModel, VcsLabel, VcsTextField } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getDepthOfFieldDefaults } from './defaultValues.js';
   import { depthOfFieldPattern } from './validators.js';
@@ -112,7 +109,7 @@
       VcsTextField,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getDepthOfFieldDefaults,
         validator: (value) => {
@@ -121,15 +118,9 @@
       },
     },
     setup(props, { emit }) {
-      const depthOfField = { ...props.value };
+      const depthOfField = useProxiedComplexModel(props, 'modelValue', emit);
       const depthOfFieldDefaults = getDepthOfFieldDefaults();
 
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(depthOfField, props.value);
-        },
-      );
       const app = inject('vcsApp');
       const rules = {
         focalDistance: [
@@ -158,22 +149,19 @@
         name: 'enableDofAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: depthOfField.enabled,
+        active: depthOfField.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !depthOfField.enabled,
-          });
-          this.active = !depthOfField.enabled;
-          this.setTitleAndIcon();
+          depthOfField.value.enabled = !depthOfField.value.enabled;
+          enableAction.active = depthOfField.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
       enableAction.setTitleAndIcon();
@@ -183,35 +171,31 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...depthOfFieldDefaults,
-            enabled: depthOfField.enabled,
-          });
+          depthOfField.value = { ...depthOfFieldDefaults };
+          enableAction.active = depthOfField.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(depthOfField.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== depthOfFieldDefaults[key])
+            .some(
+              (key) => depthOfField.value[key] !== depthOfFieldDefaults[key],
+            )
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(depthOfField, depthOfFieldPattern)) {
-          emit('input', { ...depthOfField });
-        }
-      };
       return {
         rules,
         actions,
         depthOfField,
-        onInput,
       };
     },
   };
 </script>
+<style lang="scss" scoped></style>

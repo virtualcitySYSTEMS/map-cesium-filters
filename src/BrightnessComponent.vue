@@ -5,7 +5,7 @@
     :header-actions="actions"
     heading="cesium-filters.brightness"
   >
-    <v-container style="padding-top: 0px; padding-left: 24px">
+    <v-container>
       <v-row no-gutters>
         <v-col>
           <VcsLabel html-for="bright_id">
@@ -23,7 +23,6 @@
             v-model.number="brightness.brightness"
             :rules="rules.brightness"
             :disabled="!brightness.enabled"
-            @input="onInput"
           />
         </v-col>
       </v-row>
@@ -32,9 +31,9 @@
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { inject, computed, watch, reactive } from 'vue';
-  import { VcsLabel, VcsTextField } from '@vcmap/ui';
-  import { VRow, VCol, VContainer } from 'vuetify/lib';
+  import { inject, computed, reactive } from 'vue';
+  import { useProxiedComplexModel, VcsLabel, VcsTextField } from '@vcmap/ui';
+  import { VRow, VCol, VContainer } from 'vuetify/components';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { getBrightnessDefaults } from './defaultValues.js';
   import { brightnessPattern } from './validators.js';
@@ -50,7 +49,7 @@
       VcsTextField,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getBrightnessDefaults,
         validator: (value) => {
@@ -59,14 +58,8 @@
       },
     },
     setup(props, { emit }) {
-      const brightness = { ...props.value };
+      const brightness = useProxiedComplexModel(props, 'modelValue', emit);
       const brightnessDefaults = getBrightnessDefaults();
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(brightness, props.value);
-        },
-      );
 
       const app = inject('vcsApp');
       const rules = {
@@ -81,22 +74,19 @@
         name: 'enableBriAction',
         title: 'cesium-filters.tooltip.activate',
         icon: 'mdi-checkbox-blank-outline',
-        active: brightness.enabled,
+        active: brightness.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          enableAction.icon = enableAction.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !brightness.enabled,
-          });
-          this.active = !brightness.enabled;
-          this.setTitleAndIcon();
+          brightness.value.enabled = !brightness.value.enabled;
+          enableAction.active = brightness.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
       enableAction.setTitleAndIcon();
@@ -105,36 +95,29 @@
         title: 'cesium-filters.tooltip.reset',
         icon: '$vcsReturn',
         callback() {
-          emit('input', {
-            ...brightnessDefaults,
-            enabled: brightness.enabled,
-          });
+          brightness.value = { ...brightnessDefaults };
+          enableAction.active = brightness.value.enabled;
+          enableAction.setTitleAndIcon();
         },
       });
 
       const actions = computed(() => {
         if (
-          Object.keys(props.value)
+          Object.keys(brightness.value)
             .filter((key) => key !== 'enabled')
-            .some((key) => props.value[key] !== brightnessDefaults[key])
+            .some((key) => brightness.value[key] !== brightnessDefaults[key])
         ) {
           return [enableAction, resetAction];
         }
         return [enableAction];
       });
 
-      const onInput = () => {
-        if (is(brightness, brightnessPattern)) {
-          emit('input', { ...brightness });
-        }
-      };
-
       return {
         rules,
         actions,
         brightness,
-        onInput,
       };
     },
   };
 </script>
+<style lang="scss" scoped></style>

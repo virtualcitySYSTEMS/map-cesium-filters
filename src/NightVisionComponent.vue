@@ -3,12 +3,12 @@
     :expandable="false"
     :header-actions="[action]"
     heading="cesium-filters.nightvision"
-  >
-  </ModifiedSectionComponent>
+  />
 </template>
 <script>
   import { is } from '@vcsuite/check';
-  import { watch, reactive } from 'vue';
+  import { reactive } from 'vue';
+  import { useProxiedComplexModel } from '@vcmap/ui';
   import { getNightVisionDefaults } from './defaultValues.js';
   import ModifiedSectionComponent from './ModifiedSectionComponent.vue';
   import { nightVisionPattern } from './validators.js';
@@ -19,7 +19,7 @@
       ModifiedSectionComponent,
     },
     props: {
-      value: {
+      modelValue: {
         type: Object,
         default: getNightVisionDefaults,
         validator: (value) => {
@@ -28,48 +28,41 @@
       },
     },
     setup(props, { emit }) {
-      const nightVision = { ...props.value };
+      const nightVision = useProxiedComplexModel(props, 'modelValue', emit);
 
-      watch(
-        () => props.value,
-        () => {
-          Object.assign(nightVision, props.value);
-        },
-      );
       const action = reactive({
         name: 'enableNigAction',
         icon: 'mdi-checkbox-blank-outline',
-        active: nightVision.enabled,
+        active: nightVision.value.enabled,
         setTitleAndIcon() {
-          this.icon = this.active
+          action.icon = action.active
             ? 'mdi-checkbox-marked'
             : 'mdi-checkbox-blank-outline';
-          this.title = this.active
+          action.title = action.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';
         },
         callback() {
-          emit('input', {
-            ...props.value,
-            enabled: !nightVision.enabled,
-          });
-          this.active = !nightVision.enabled;
-          this.setTitleAndIcon();
+          nightVision.value.enabled = !nightVision.value.enabled;
+          action.active = nightVision.value.enabled;
+          action.setTitleAndIcon();
         },
       });
 
       action.setTitleAndIcon();
 
-      const onInput = () => {
-        if (is(nightVision, nightVisionPattern)) {
-          emit('input', { ...nightVision });
-        }
-      };
       return {
         action,
         nightVision,
-        onInput,
       };
     },
   };
 </script>
+
+<style lang="scss" scoped>
+  :deep(.vcs-form-section-header) {
+    padding-left: calc(
+      (var(--v-vcs-font-size) * (1.2 + 0.1 / 3)) + 2px
+    ) !important;
+  }
+</style>
