@@ -1,6 +1,6 @@
 import { WindowSlot, ButtonLocation } from '@vcmap/ui';
 import { CesiumMap } from '@vcmap/core';
-import { reactive, computed, watch, shallowReactive } from 'vue';
+import { reactive, watch, shallowReactive } from 'vue';
 import {
   PostProcessStageLibrary,
   Color,
@@ -44,12 +44,6 @@ import {
 import de from './i18n/de.json';
 import en from './i18n/en.json';
 
-export function getToggleTitle(action) {
-  if (action?.active) {
-    return 'cesium-filters.toolState.deactivate';
-  }
-  return 'cesium-filters.toolState.activate';
-}
 function setupButton(app) {
   const windowComponent = {
     id: windowId,
@@ -64,8 +58,8 @@ function setupButton(app) {
   };
 
   const action = reactive({
-    name: computed(() => getToggleTitle(action)),
-    title: 'cesium-filters.toolState.open',
+    name: 'cesium-filters.toolState.open',
+    title: 'cesium-filters.toolState.tooltip',
     icon: '$vcsRectangle',
     active: false,
     disabled: false,
@@ -84,14 +78,11 @@ function setupButton(app) {
     app.windowManager.added.addEventListener(({ id }) => {
       if (id === windowComponent.id) {
         action.active = true;
-
-        action.title = getToggleTitle(action);
       }
     }),
     app.windowManager.removed.addEventListener(({ id }) => {
       if (id === windowComponent.id) {
         action.active = false;
-        action.title = getToggleTitle(action);
       }
     }),
   ];

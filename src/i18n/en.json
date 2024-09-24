@@ -88,7 +88,8 @@
     "toolState": {
       "open": "Filter and Effects",
       "activate": "Filter and Effects",
-      "deactivate": "close window"
+      "deactivate": "close window",
+      "tooltip": "Settings to apply visual effects to the map"
     }
   }
 }

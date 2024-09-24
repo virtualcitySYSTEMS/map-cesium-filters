@@ -88,7 +88,8 @@
     "toolState": {
       "open": "Filter und Effekte",
       "activate": "Filter und Effekte",
-      "deactivate": "Fenster schließen"
+      "deactivate": "Fenster schließen",
+      "tooltip": "Einstellungen zur Anwendung visueller Effekte auf die Karte"
     }
   }
 }
