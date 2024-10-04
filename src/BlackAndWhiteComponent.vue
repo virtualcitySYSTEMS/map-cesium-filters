@@ -73,12 +73,12 @@
       const enableAction = reactive({
         name: 'enableBaWAction',
         title: 'cesium-filters.tooltip.activate',
-        icon: 'mdi-checkbox-blank-outline',
+        icon: '$vcsCheckbox',
         active: blackAndWhite.value.enabled,
         setTitleAndIcon() {
           enableAction.icon = enableAction.active
-            ? 'mdi-checkbox-marked'
-            : 'mdi-checkbox-blank-outline';
+            ? '$vcsCheckboxChecked'
+            : '$vcsCheckbox';
           enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';

@@ -60,7 +60,7 @@ function setupButton(app) {
   const action = reactive({
     name: 'cesium-filters.toolState.open',
     title: 'cesium-filters.toolState.tooltip',
-    icon: '$vcsRectangle',
+    icon: 'mdi-gradient-vertical',
     active: false,
     disabled: false,
     callback() {
@@ -730,8 +730,9 @@ export default function FilterEffectsPlugin(config) {
             lig[key] = myValues.lighting[key];
           }
         });
-
-        state.lig = lig;
+        if (Object.keys(lig).length > 0) {
+          state.lig = lig;
+        }
       }
       if (Object.keys(state).length > 0) {
         return state;

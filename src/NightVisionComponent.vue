@@ -32,12 +32,10 @@
 
       const action = reactive({
         name: 'enableNigAction',
-        icon: 'mdi-checkbox-blank-outline',
+        icon: '$vcsCheckbox',
         active: nightVision.value.enabled,
         setTitleAndIcon() {
-          action.icon = action.active
-            ? 'mdi-checkbox-marked'
-            : 'mdi-checkbox-blank-outline';
+          action.icon = action.active ? '$vcsCheckboxChecked' : '$vcsCheckbox';
           action.title = action.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';

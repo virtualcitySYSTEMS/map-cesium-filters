@@ -197,12 +197,12 @@
       const enableAction = reactive({
         name: 'enableBloAction',
         title: 'cesium-filters.tooltip.activate',
-        icon: 'mdi-checkbox-blank-outline',
+        icon: '$vcsCheckbox',
         active: bloom.value.enabled,
         setTitleAndIcon() {
           enableAction.icon = enableAction.active
-            ? 'mdi-checkbox-marked'
-            : 'mdi-checkbox-blank-outline';
+            ? '$vcsCheckboxChecked'
+            : '$vcsCheckbox';
           enableAction.title = enableAction.active
             ? 'cesium-filters.tooltip.deactivate'
             : 'cesium-filters.tooltip.activate';

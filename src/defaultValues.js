@@ -79,7 +79,7 @@ export function getLightingDefaults(selected) {
     return {
       enabled: false,
       selected,
-      lightIntensity: 2,
+      lightIntensity: 3,
       color: '#FFFFFF',
       showButton: false,
       x: 0,
@@ -123,7 +123,7 @@ export function getLightingDefaults(selected) {
     return {
       enabled: false,
       selected: 0,
-      lightIntensity: 2,
+      lightIntensity: 3,
       color: '#FFFFFF',
       showButton: false,
       x: 0,
