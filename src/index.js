@@ -43,6 +43,7 @@ import {
 } from './validators.js';
 import de from './i18n/de.json';
 import en from './i18n/en.json';
+import { collectInitialValues } from './initialValues.js';
 
 function setupButton(app) {
   const windowComponent = {
@@ -130,6 +131,7 @@ export default function FilterEffectsPlugin(config) {
     },
   });
   const watcher = [];
+  let savedState = null; // To store the state
 
   return {
     get name() {
@@ -150,6 +152,7 @@ export default function FilterEffectsPlugin(config) {
 
     initialize(vcsUiApp, state) {
       this._app = vcsUiApp;
+
       const { action, destroy, windowComponent } = setupButton(vcsUiApp);
       this._destroyAction = destroy;
       this._mapChangedListener = vcsUiApp.maps.mapActivated.addEventListener(
@@ -261,13 +264,17 @@ export default function FilterEffectsPlugin(config) {
       if (
         vcsUiApp.maps.activeMap &&
         vcsUiApp.maps.activeMap instanceof CesiumMap
-      )
+      ) {
+        savedState = collectInitialValues(vcsUiApp.maps.activeMap);
         applyState(); // should be handled by the watchers
-      else {
+      } else {
         // This listener applies the state only once when Cesium Map initally activated
         initialMapActivatedListener =
           vcsUiApp.maps.mapActivated.addEventListener((map) => {
             if (map instanceof CesiumMap) {
+              if (!savedState) {
+                savedState = collectInitialValues(map);
+              }
               applyState();
               initialMapActivatedListener();
             }
@@ -752,6 +759,314 @@ export default function FilterEffectsPlugin(config) {
       en,
     },
     destroy() {
+      const { map } = savedState;
+      if (!map.isDestroyed) {
+        if ('ambientOcclusion' in savedState) {
+          const newValue = savedState.ambientOcclusion;
+
+          let ambientOcclusion =
+            map.getScene()?.postProcessStages?.ambientOcclusion;
+          if (ambientOcclusion) {
+            ambientOcclusion.uniforms.intensity = newValue.intensity;
+            ambientOcclusion.enabled = newValue.enabled;
+            ambientOcclusion.uniforms.ambientOcclusionOnly =
+              newValue.ambientOcclusionOnly;
+            ambientOcclusion.uniforms.frustumLength = newValue.frustumLength;
+            ambientOcclusion.uniforms.blurStepSize = newValue.blurStepSize;
+            ambientOcclusion.uniforms.stepSize = newValue.stepSize;
+            ambientOcclusion.uniforms.lengthCap = newValue.lengthCap;
+            ambientOcclusion.uniforms.bias = newValue.bias;
+          } else {
+            ambientOcclusion =
+              map.getScene()?.postProcessStages?.ambientOcclusion;
+            ambientOcclusion.enabled = false;
+          }
+        } else {
+          const ambientOcclusion =
+            map.getScene()?.postProcessStages?.ambientOcclusion;
+          ambientOcclusion.enabled = false;
+        }
+
+        if ('blackAndWhite' in savedState) {
+          const newValue = savedState.blackAndWhite;
+          if (
+            map instanceof CesiumMap &&
+            map.getScene()?.postProcessStages &&
+            is(newValue, blackAndWhitePattern)
+          ) {
+            let bawStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_black_and_white');
+            if (!bawStage) {
+              bawStage = map
+                .getScene()
+                ?.postProcessStages?.add(
+                  PostProcessStageLibrary.createBlackAndWhiteStage(),
+                );
+            }
+            bawStage.uniforms.gradations = newValue.gradations;
+            bawStage.enabled = newValue.enabled;
+          } else {
+            const bawStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_black_and_white');
+            if (bawStage) {
+              bawStage.enabled = false;
+            }
+          }
+        } else {
+          const bawStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_black_and_white');
+          if (bawStage) {
+            bawStage.enabled = false;
+          }
+        }
+
+        if ('bloom' in savedState) {
+          const newValue = savedState.bloom;
+
+          let bloom = map.getScene()?.postProcessStages?.bloom;
+          if (bloom && is(newValue, bloomPattern)) {
+            bloom.enabled = newValue.enabled;
+            bloom.uniforms.contrast = newValue.contrast;
+            bloom.uniforms.brightness = newValue.brightness;
+            bloom.uniforms.delta = newValue.delta;
+            bloom.uniforms.sigma = newValue.sigma;
+            bloom.uniforms.stepSize = newValue.stepSize;
+            bloom.uniforms.glowOnly = newValue.glowOnly;
+          } else {
+            bloom = map.getScene()?.postProcessStages?.bloom;
+            if (bloom) {
+              bloom.enabled = false;
+            }
+          }
+        } else {
+          const bloom = map.getScene()?.postProcessStages?.bloom;
+          if (bloom) {
+            bloom.enabled = false;
+          }
+        }
+
+        if ('hdr' in savedState) {
+          const newValue = savedState.hdr;
+
+          let hdr = map.getScene();
+          if (hdr && is(newValue, hdrPattern)) {
+            hdr.gamma = newValue.gamma;
+            hdr.highDynamicRange = newValue.enabled;
+          } else {
+            hdr = map.getScene();
+            if (hdr) {
+              hdr.highDynamicRange = false;
+            }
+          }
+        } else {
+          const hdr = map.getScene();
+          if (hdr) {
+            hdr.highDynamicRange = false;
+          }
+        }
+
+        if ('depthOfField' in savedState) {
+          const newValue = savedState.depthOfField;
+          if (
+            map instanceof CesiumMap &&
+            map.getScene()?.postProcessStages &&
+            is(newValue, depthOfFieldPattern)
+          ) {
+            let dofStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_depth_of_field');
+            if (!dofStage) {
+              dofStage = map
+                .getScene()
+                ?.postProcessStages?.add(
+                  PostProcessStageLibrary.createDepthOfFieldStage(),
+                );
+            }
+            dofStage.uniforms.focalDistance = newValue.focalDistance;
+            dofStage.enabled = newValue.enabled;
+            dofStage.uniforms.delta = newValue.delta;
+            dofStage.uniforms.sigma = newValue.sigma;
+            dofStage.uniforms.stepSize = newValue.stepSize;
+          } else {
+            const dofStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_depth_of_field');
+            if (dofStage) {
+              dofStage.enabled = false;
+            }
+          }
+        } else {
+          const dofStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_depth_of_field');
+          if (dofStage) {
+            dofStage.enabled = false;
+          }
+        }
+
+        if ('brightness' in savedState) {
+          const newValue = savedState.brightness;
+          if (
+            map instanceof CesiumMap &&
+            map.getScene()?.postProcessStages &&
+            is(newValue, brightnessPattern)
+          ) {
+            let brtStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_brightness');
+            if (!brtStage) {
+              brtStage = map
+                .getScene()
+                ?.postProcessStages?.add(
+                  PostProcessStageLibrary.createBrightnessStage(),
+                );
+            }
+            brtStage.uniforms.brightness = newValue.brightness;
+            brtStage.enabled = newValue.enabled;
+          } else {
+            const brtStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_brightness');
+            if (brtStage) {
+              brtStage.enabled = false;
+            }
+          }
+        } else {
+          const brtStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_brightness');
+          if (brtStage) {
+            brtStage.enabled = false;
+          }
+        }
+
+        if ('blur' in savedState) {
+          const newValue = savedState.blur;
+          if (
+            map instanceof CesiumMap &&
+            map.getScene()?.postProcessStages &&
+            is(newValue, blurPattern)
+          ) {
+            let blrStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_blur');
+            if (!blrStage) {
+              blrStage = map
+                .getScene()
+                ?.postProcessStages?.add(
+                  PostProcessStageLibrary.createBlurStage(),
+                );
+            }
+            blrStage.uniforms.delta = newValue.delta;
+            blrStage.uniforms.sigma = newValue.sigma;
+            blrStage.uniforms.stepSize = newValue.stepSize;
+            blrStage.enabled = newValue.enabled;
+          } else {
+            const blrStage = map
+              .getScene()
+              ?.postProcessStages?.getStageByName('czm_blur');
+            if (blrStage) {
+              blrStage.enabled = false;
+            }
+          }
+        } else {
+          const blrStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_blur');
+          if (blrStage) {
+            blrStage.enabled = false;
+          }
+        }
+
+        if ('silhouette' in savedState) {
+          const newValue = savedState.silhouette;
+
+          let silStage = PostProcessStageLibrary.createSilhouetteStage();
+          let scene = map.getScene();
+          let existingStage = scene?.postProcessStages?.getStageByName(
+            silStage.name,
+          );
+          if (existingStage) {
+            scene?.postProcessStages?.remove(existingStage);
+          }
+          const silhouette = scene?.postProcessStages?.add(silStage);
+          if (silhouette && is(newValue, silhouettePattern)) {
+            silhouette.enabled = newValue.enabled;
+            silhouette.uniforms.color = Color.fromCssColorString(
+              newValue.color,
+            );
+          } else {
+            silStage = PostProcessStageLibrary.createSilhouetteStage();
+            scene = map.getScene();
+            existingStage = scene?.postProcessStages?.getStageByName(
+              silStage.name,
+            );
+            if (existingStage) {
+              scene?.postProcessStages?.remove(existingStage);
+            }
+          }
+        } else {
+          const silStage = PostProcessStageLibrary.createSilhouetteStage();
+          const scene = map.getScene();
+          const existingStage = scene?.postProcessStages?.getStageByName(
+            silStage.name,
+          );
+          if (existingStage) {
+            scene?.postProcessStages?.remove(existingStage);
+          }
+        }
+
+        if ('lighting' in savedState) {
+          const newValue = savedState.lighting;
+
+          map.getScene().light = newValue.light;
+          map.getScene().globe.dynamicAtmosphereLighting =
+            newValue.dynamicAtmosphereLighting;
+          map.getScene().globe.dynamicAtmosphereLightingFromSun =
+            newValue.dynamicAtmosphereLightingFromSun;
+          map.getScene().light.intensity = newValue.intensity;
+          map.getScene().light.color = newValue.color;
+        }
+      }
+
+      if ('nightVision' in savedState) {
+        const newValue = savedState.nightVision;
+        if (
+          map instanceof CesiumMap &&
+          map.getScene()?.postProcessStages &&
+          is(newValue, nightVisionPattern)
+        ) {
+          let nvStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_night_vision');
+          if (!nvStage) {
+            nvStage = map
+              .getScene()
+              ?.postProcessStages?.add(
+                PostProcessStageLibrary.createNightVisionStage(),
+              );
+          }
+          nvStage.enabled = newValue.enabled;
+        } else {
+          const nvStage = map
+            .getScene()
+            ?.postProcessStages?.getStageByName('czm_night_vision');
+          if (nvStage) {
+            nvStage.enabled = false;
+          }
+        }
+      } else {
+        const nvStage = map
+          .getScene()
+          ?.postProcessStages?.getStageByName('czm_night_vision');
+        if (nvStage) {
+          nvStage.enabled = false;
+        }
+      }
+
       if (this._app) {
         if (this._app.navbarManager.has(name)) {
           this._app.navbarManager.remove(name);
