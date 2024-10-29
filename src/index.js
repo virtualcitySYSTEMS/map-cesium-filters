@@ -744,7 +744,7 @@ export default function FilterEffectsPlugin(config) {
       if (Object.keys(state).length > 0) {
         return state;
       } else {
-        return undefined;
+        return {};
       }
     },
     getDefaultOptions,
