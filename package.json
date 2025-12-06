@@ -66,5 +66,8 @@
   "mapVersion": "^6.0",
   "dependencies": {
     "@vcsuite/check": "^2.1.0"
+  },
+  "overrides": {
+    "esbuild": "^0.25.0"
   }
 }
